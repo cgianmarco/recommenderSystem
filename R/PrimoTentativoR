@@ -1,0 +1,67 @@
+# Install (ho messo installed perche io gia li ho installati)
+installed.packages("tm")  # for text mining
+installed.packages("SnowballC") # for text stemming
+installed.packages("wordcloud") # word-cloud generator 
+installed.packages("RColorBrewer") # color palettes
+# Load
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+
+# Nelle successive 5 righe ho preso un file da una risorsa web (che ho chiamato text) 
+# e un altro dal locale  (obama) di cui ho dovuto stabilire il percorso. Nell'ultima riga
+# ho fatto il merge per farli diventare un unico documento
+
+filePath <- "http://www.sthda.com/sthda/RDoc/example-files/martin-luther-king-i-have-a-dream-speech.txt"
+text <- readLines(filePath)
+library(readr)
+obama <- read_csv("~/Desktop/TIROCINIO/RSTUDIO/obama.csv")
+myfulldata = merge(text, obama)
+
+# docs diventa il mio vettore su cui poter effettuare le operazioni in r
+docs <- Corpus(VectorSource(text))
+
+# pulisco lo schifo che ci sta nel merge attraverso questi comandi
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+
+# ltri comandi di pulizia aggiuntivi molto buoni
+docs <- tm_map(docs, content_transformer(tolower))
+# rimuovo numeri
+docs <- tm_map(docs, removeNumbers)
+# rimuovo le parole in inglese inutili
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Rimuovo parole che posso scegliere personalmente
+# specificandole tra le virgolette
+docs <- tm_map(docs, removeWords, c("blabla1", "blabla2")) 
+# Rimuovo punteggiatura
+docs <- tm_map(docs, removePunctuation)
+# Rimuovo gli spazi extra bianchi
+docs <- tm_map(docs, stripWhitespace)
+
+#seleziona tutte le righe che mancano e runnale e guarda che figata esce fuori ahahah
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+head(d, 10)
+
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+
+
+
+
+
+
+
+
+
+
+
