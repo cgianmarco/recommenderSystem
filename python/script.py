@@ -7,10 +7,10 @@
 
 import subprocess
 
-movie_title = "The thing"
+movie_title = "Titanic"
 
 # Execute YTFS
-test = subprocess.Popen(["java","-jar","YTFS.jar","--limit","5",movie_title], stdout=subprocess.PIPE)
+test = subprocess.Popen(["java","-jar","YTFS.jar","--limit","20",movie_title], stdout=subprocess.PIPE)
 
 # Get output
 output = test.communicate()[0]
@@ -28,32 +28,56 @@ videoIds = []
 for link in links:
 	videoIds.append(link.split('?v=')[1])
 
+print videoIds
 
 
 
 
 
 
-#########################################
-
-# Get comments from videoID
 
 #########################################
 
-import urllib2
+# Get comments from videoIDs
+
+#########################################
+
+import urllib, urllib2
 import json
 
-videoId = "l9PxOanFjxQ"
-maxResults = 30
+comments = []
+# videoId = "l9PxOanFjxQ"
+maxResults = 100
 
-# Youtube query
-query = "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=" + str(videoId) + "&maxResults=" + str(maxResults) + "&key=AIzaSyBHWLQQO7jtOu1i49pgKL4h0uupCDjK-Iw"
-response = urllib2.urlopen(query).read()
 
-# From string to JSON
-response = json.loads(response)
+for videoId in videoIds:
 
-# Print comments
-for i in range(len(response['items'])):
-	print response['items'][i]['snippet']['topLevelComment']['snippet']['textOriginal']
+	# Youtube query
+	query = "https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId=" + str(videoId) + "&maxResults=" + str(maxResults) + "&key=AIzaSyBHWLQQO7jtOu1i49pgKL4h0uupCDjK-Iw"
+	print query
+
+
+	try:
+		response = urllib2.urlopen(query).read()
+
+	# Ignore HTTP Error if comments disabled
+	except urllib2.HTTPError:
+		continue
+
+	else:
+		# From string to JSON
+		response = json.loads(response)
+
+		# Get comments
+		for i in range(len(response['items'])):
+			comments.append(response['items'][i]['snippet']['topLevelComment']['snippet']['textDisplay'])
+
+
+# Save comments to file
+file = open('comments.txt', 'w')
+for item in comments:
+	file.write("%s\n" % item.encode('utf-8'))
+
+	
+print "Number of saved comments: " + str(len(comments))
 
