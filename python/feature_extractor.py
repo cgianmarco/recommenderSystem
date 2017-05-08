@@ -5,7 +5,7 @@ import re
 from nltk import pos_tag, word_tokenize
 
 columns = ['ID', 'videoID', 'authorID', 'posted', 'content', 'rating']
-df = pd.read_csv("data.csv", delimiter=';', error_bad_lines=False, nrows=100000, names=columns)
+df = pd.read_csv("data.csv", delimiter=';', error_bad_lines=False, nrows=10000, names=columns)
 
 def cleanhtml(raw_html):
   cleanr = re.compile('<.*?>.*?</.*?>')
@@ -54,7 +54,7 @@ average_p = np.mean(cnt.values())
 
 
 
-dataset = open("comments_Arrival.txt")
+dataset = open("comments_The sixth sense.txt")
 comments = dataset.readlines()
 
 cnt2 = Counter()
@@ -71,7 +71,7 @@ for line in comments:
 		if tag == 'NN':
 			if len(word) > 2:
 				cnt2[word] += 1
-				total += 1
+				# total += 1
 
 
 # for key in cnt2.keys()[:10]:
